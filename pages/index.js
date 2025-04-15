@@ -6,7 +6,7 @@ import html2canvas from 'html2canvas';
 export default function Home() {
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1.2); // valor por defecto medio
+  const [zoom, setZoom] = useState(1.2);
   const cropAreaRef = useRef();
   const imgRef = useRef();
 
@@ -22,7 +22,7 @@ export default function Home() {
       img.onload = () => {
         imgRef.current = img;
         const aspect = img.width / img.height;
-        setZoom(aspect > 1 ? 1.1 : 1.3); // ajustar zoom inicial según formato
+        setZoom(aspect > 1 ? 1.15 : 1.3); // autoajuste
       };
       img.src = reader.result;
     };
@@ -41,7 +41,7 @@ export default function Home() {
     clone.style.top = '-10000px';
     document.body.appendChild(clone);
 
-    const canvas = await html2canvas(clone);
+    const canvas = await html2canvas(clone, { backgroundColor: null });
     const link = document.createElement('a');
     link.download = 'foto_espasa.png';
     link.href = canvas.toDataURL();
@@ -51,8 +51,8 @@ export default function Home() {
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: 20 }}>
-      <h1 style={{ fontFamily: 'sans-serif' }}>Foto institucional ESPASA VW</h1>
+    <div style={{ textAlign: 'center', padding: 20, fontFamily: 'sans-serif' }}>
+      <h1>Foto institucional ESPASA VW</h1>
       <input type="file" accept="image/*" onChange={handleImageChange} />
       <br /><br />
 
@@ -64,8 +64,9 @@ export default function Home() {
             width: 300,
             height: 300,
             margin: '0 auto',
-            overflow: 'hidden',
+            backgroundColor: '#001f4d',
             borderRadius: '50%',
+            overflow: 'hidden',
           }}
         >
           <Cropper
@@ -77,7 +78,15 @@ export default function Home() {
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
             showGrid={false}
-            style={{ containerStyle: { borderRadius: '50%' } }}
+            objectFit="cover"
+            style={{
+              containerStyle: {
+                borderRadius: '50%',
+              },
+              mediaStyle: {
+                borderRadius: '50%',
+              }
+            }}
           />
           <img
             src="/marcos/general.png"
@@ -88,7 +97,7 @@ export default function Home() {
               left: 0,
               width: '100%',
               height: '100%',
-              pointerEvents: 'none',
+              pointerEvents: 'none'
             }}
           />
         </div>
