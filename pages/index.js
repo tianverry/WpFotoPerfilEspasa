@@ -44,6 +44,7 @@ export default function Home() {
             width: 300,
             height: 300,
             margin: '0 auto',
+            overflow: 'hidden',
           }}
         >
           <Cropper
@@ -54,6 +55,7 @@ export default function Home() {
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
+            showGrid={false}
           />
           <img
             src="/marcos/general.png"
