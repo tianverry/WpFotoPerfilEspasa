@@ -22,12 +22,29 @@ export default function Home() {
   };
 
   const downloadImage = async () => {
-    if (!cropAreaRef.current) return;
-    const canvas = await html2canvas(cropAreaRef.current);
+    const canvasArea = cropAreaRef.current;
+    if (!canvasArea) return;
+
+    // Crear clon sin marco
+    const clone = canvasArea.cloneNode(true);
+    const marco = clone.querySelector('img[alt="Marco"]');
+    if (marco) marco.style.display = 'none';
+
+    // Insertar el clon fuera de pantalla
+    clone.style.position = 'absolute';
+    clone.style.top = '-10000px';
+    document.body.appendChild(clone);
+
+    const canvas = await html2canvas(clone);
+
+    // Descargar imagen
     const link = document.createElement('a');
     link.download = 'foto_espasa.png';
     link.href = canvas.toDataURL();
     link.click();
+
+    // Eliminar el clon del DOM
+    document.body.removeChild(clone);
   };
 
   return (
