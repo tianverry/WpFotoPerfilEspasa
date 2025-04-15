@@ -6,8 +6,9 @@ import html2canvas from 'html2canvas';
 export default function Home() {
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(1.2); // valor por defecto medio
   const cropAreaRef = useRef();
+  const imgRef = useRef();
 
   const onCropComplete = useCallback(() => {}, []);
 
@@ -17,6 +18,13 @@ export default function Home() {
     const reader = new FileReader();
     reader.onload = () => {
       setImageSrc(reader.result);
+      const img = new Image();
+      img.onload = () => {
+        imgRef.current = img;
+        const aspect = img.width / img.height;
+        setZoom(aspect > 1 ? 1.1 : 1.3); // ajustar zoom inicial según formato
+      };
+      img.src = reader.result;
     };
     reader.readAsDataURL(file);
   };
@@ -25,31 +33,26 @@ export default function Home() {
     const canvasArea = cropAreaRef.current;
     if (!canvasArea) return;
 
-    // Crear clon sin marco
     const clone = canvasArea.cloneNode(true);
     const marco = clone.querySelector('img[alt="Marco"]');
     if (marco) marco.style.display = 'none';
 
-    // Insertar el clon fuera de pantalla
     clone.style.position = 'absolute';
     clone.style.top = '-10000px';
     document.body.appendChild(clone);
 
     const canvas = await html2canvas(clone);
-
-    // Descargar imagen
     const link = document.createElement('a');
     link.download = 'foto_espasa.png';
     link.href = canvas.toDataURL();
     link.click();
 
-    // Eliminar el clon del DOM
     document.body.removeChild(clone);
   };
 
   return (
     <div style={{ textAlign: 'center', padding: 20 }}>
-      <h1>Foto institucional ESPASA VW</h1>
+      <h1 style={{ fontFamily: 'sans-serif' }}>Foto institucional ESPASA VW</h1>
       <input type="file" accept="image/*" onChange={handleImageChange} />
       <br /><br />
 
@@ -62,6 +65,7 @@ export default function Home() {
             height: 300,
             margin: '0 auto',
             overflow: 'hidden',
+            borderRadius: '50%',
           }}
         >
           <Cropper
@@ -73,6 +77,7 @@ export default function Home() {
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
             showGrid={false}
+            style={{ containerStyle: { borderRadius: '50%' } }}
           />
           <img
             src="/marcos/general.png"
@@ -83,7 +88,7 @@ export default function Home() {
               left: 0,
               width: '100%',
               height: '100%',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
             }}
           />
         </div>
