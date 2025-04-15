@@ -1,5 +1,5 @@
 {
-  "name": "espasa-foto-app",
+  "name": "espasa-foto-app-crop",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -10,6 +10,8 @@
   "dependencies": {
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-easy-crop": "^4.4.0",
+    "html2canvas": "^1.4.1"
   }
 }

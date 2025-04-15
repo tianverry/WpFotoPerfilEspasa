@@ -1,56 +1,90 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
+import Cropper from 'react-easy-crop';
+import html2canvas from 'html2canvas';
 
 export default function Home() {
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const canvasRef = useRef(null);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const cropAreaRef = useRef();
 
-  const handleImageUpload = (e) => {
+  const onCropComplete = useCallback(() => {}, []);
+
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      setPreviewUrl(reader.result);
+      setImageSrc(reader.result);
     };
     reader.readAsDataURL(file);
   };
 
-  const applyOverlay = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const baseImage = new Image();
-    const overlay = new Image();
-
-    baseImage.src = previewUrl;
-    overlay.src = '/marcos/general.png';
-
-    baseImage.onload = () => {
-      canvas.width = 800;
-      canvas.height = 800;
-      ctx.drawImage(baseImage, 0, 0, 800, 800);
-      overlay.onload = () => {
-        ctx.drawImage(overlay, 0, 0, 800, 800);
-      };
-    };
-  };
-
-  const downloadImage = () => {
+  const downloadImage = async () => {
+    if (!cropAreaRef.current) return;
+    const canvas = await html2canvas(cropAreaRef.current);
     const link = document.createElement('a');
-    link.download = `foto_espasa.png`;
-    link.href = canvasRef.current.toDataURL();
+    link.download = 'foto_espasa.png';
+    link.href = canvas.toDataURL();
     link.click();
   };
 
   return (
     <div style={{ textAlign: 'center', padding: 20 }}>
       <h1>Foto institucional ESPASA VW</h1>
-      <input type="file" accept="image/*" onChange={handleImageUpload} />
+      <input type="file" accept="image/*" onChange={handleImageChange} />
       <br /><br />
-      <button onClick={applyOverlay}>Aplicar marco</button>
-      <br /><br />
-      <canvas ref={canvasRef} style={{ border: '1px solid black' }}></canvas>
-      <br /><br />
-      <button onClick={downloadImage}>Descargar imagen</button>
+
+      {imageSrc && (
+        <div
+          ref={cropAreaRef}
+          style={{
+            position: 'relative',
+            width: 300,
+            height: 300,
+            margin: '0 auto',
+          }}
+        >
+          <Cropper
+            image={imageSrc}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onCropComplete}
+          />
+          <img
+            src="/marcos/general.png"
+            alt="Marco"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none'
+            }}
+          />
+        </div>
+      )}
+
+      {imageSrc && (
+        <>
+          <br />
+          <input
+            type="range"
+            min={1}
+            max={3}
+            step={0.1}
+            value={zoom}
+            onChange={(e) => setZoom(e.target.value)}
+          />
+          <br /><br />
+          <button onClick={downloadImage}>Descargar imagen</button>
+        </>
+      )}
     </div>
   );
 }
