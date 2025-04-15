@@ -6,7 +6,7 @@ import html2canvas from 'html2canvas';
 export default function Home() {
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(1.2);
   const [minZoom, setMinZoom] = useState(1);
   const cropAreaRef = useRef();
 
@@ -20,10 +20,12 @@ export default function Home() {
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const containerSize = 300; // tamaño del crop visible
-        const zoomInicial = containerSize / img.width;
-        setZoom(zoomInicial);
-        setMinZoom(zoomInicial);
+        const cropSize = 300;
+        const zoomAuto = img.width < img.height
+          ? cropSize / img.width
+          : cropSize / img.height;
+        setZoom(zoomAuto);
+        setMinZoom(zoomAuto);
         setImageSrc(reader.result);
       };
       img.src = reader.result;
@@ -81,7 +83,7 @@ export default function Home() {
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
             showGrid={false}
-            objectFit="contain"
+            objectFit="cover"
             style={{
               containerStyle: { borderRadius: '50%' },
               mediaStyle: { borderRadius: '50%' },
