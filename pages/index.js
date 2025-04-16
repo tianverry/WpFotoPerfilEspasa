@@ -6,7 +6,7 @@ import html2canvas from 'html2canvas';
 export default function Home() {
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1.2);
+  const [zoom, setZoom] = useState(1);
   const cropAreaRef = useRef();
 
   const onCropComplete = useCallback(() => {}, []);
@@ -18,7 +18,7 @@ export default function Home() {
     const reader = new FileReader();
     reader.onload = () => {
       setImageSrc(reader.result);
-      setZoom(1.2); // valor neutro
+      setZoom(1); // zoom base sin ajuste automático
     };
     reader.readAsDataURL(file);
   };
@@ -91,15 +91,6 @@ export default function Home() {
       {imageSrc && (
         <>
           <br />
-          <input
-            type="range"
-            min={1}
-            max={3}
-            step={0.01}
-            value={zoom}
-            onChange={(e) => setZoom(parseFloat(e.target.value))}
-          />
-          <br /><br />
           <button onClick={downloadImage}>Descargar imagen</button>
         </>
       )}
