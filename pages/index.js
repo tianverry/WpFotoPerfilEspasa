@@ -43,27 +43,22 @@ export default function Home() {
     const canvasArea = cropAreaRef.current;
     if (!canvasArea) return;
 
-    const clone = canvasArea.cloneNode(true);
-    const marco = clone.querySelector('img[alt="Marco"]');
-    if (marco) marco.style.display = 'none';
-
-    clone.style.position = 'absolute';
-    clone.style.top = '-10000px';
-    clone.style.background = '#001f4d'; // fondo azul cuadrado
-    document.body.appendChild(clone);
-
-    const canvas = await html2canvas(clone, {
+    const canvas = await html2canvas(canvasArea, {
       backgroundColor: '#001f4d',
       useCORS: true,
-      allowTaint: true
+      allowTaint: true,
+      scale: 2
     });
+
+    const ctx = canvas.getContext('2d');
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = '#001f4d';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const link = document.createElement('a');
     link.download = 'foto_espasa.png';
-    link.href = canvas.toDataURL();
+    link.href = canvas.toDataURL('image/png');
     link.click();
-
-    document.body.removeChild(clone);
   };
 
   return (
