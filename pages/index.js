@@ -7,7 +7,6 @@ export default function Home() {
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1.2);
-  const [minZoom, setMinZoom] = useState(1);
   const cropAreaRef = useRef();
 
   const onCropComplete = useCallback(() => {}, []);
@@ -18,17 +17,8 @@ export default function Home() {
 
     const reader = new FileReader();
     reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const cropSize = 300;
-        const zoomAuto = img.width < img.height
-          ? cropSize / img.width
-          : cropSize / img.height;
-        setZoom(zoomAuto);
-        setMinZoom(zoomAuto);
-        setImageSrc(reader.result);
-      };
-      img.src = reader.result;
+      setImageSrc(reader.result);
+      setZoom(1.2); // valor neutro
     };
     reader.readAsDataURL(file);
   };
@@ -37,21 +27,16 @@ export default function Home() {
     const canvasArea = cropAreaRef.current;
     if (!canvasArea) return;
 
-    const clone = canvasArea.cloneNode(true);
-    const marco = clone.querySelector('img[alt="Marco"]');
-    if (marco) marco.style.display = 'none';
+    const canvas = await html2canvas(canvasArea, {
+      backgroundColor: null,
+      useCORS: true,
+      allowTaint: true
+    });
 
-    clone.style.position = 'absolute';
-    clone.style.top = '-10000px';
-    document.body.appendChild(clone);
-
-    const canvas = await html2canvas(clone, { backgroundColor: null });
     const link = document.createElement('a');
     link.download = 'foto_espasa.png';
     link.href = canvas.toDataURL();
     link.click();
-
-    document.body.removeChild(clone);
   };
 
   return (
@@ -77,7 +62,6 @@ export default function Home() {
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            minZoom={minZoom}
             aspect={1}
             onCropChange={setCrop}
             onZoomChange={setZoom}
@@ -109,7 +93,7 @@ export default function Home() {
           <br />
           <input
             type="range"
-            min={minZoom}
+            min={1}
             max={3}
             step={0.01}
             value={zoom}
