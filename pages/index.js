@@ -7,6 +7,7 @@ export default function Home() {
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  const [minZoom, setMinZoom] = useState(1);
   const cropAreaRef = useRef();
 
   const onCropComplete = useCallback(() => {}, []);
@@ -17,8 +18,23 @@ export default function Home() {
 
     const reader = new FileReader();
     reader.onload = () => {
-      setImageSrc(reader.result);
-      setZoom(1); // zoom base sin ajuste automático
+      const img = new Image();
+      img.onload = () => {
+        const marcoSize = 300;
+        const aspectRatio = img.width / img.height;
+        let baseZoom = 1;
+
+        if (aspectRatio >= 1) {
+          baseZoom = marcoSize / img.height;
+        } else {
+          baseZoom = marcoSize / img.width;
+        }
+
+        setZoom(baseZoom);
+        setMinZoom(baseZoom * 0.8); // permite alejar un poco más
+        setImageSrc(reader.result);
+      };
+      img.src = reader.result;
     };
     reader.readAsDataURL(file);
   };
@@ -56,12 +72,15 @@ export default function Home() {
             backgroundColor: '#001f4d',
             borderRadius: '50%',
             overflow: 'hidden',
+            touchAction: 'none'
           }}
         >
           <Cropper
             image={imageSrc}
             crop={crop}
             zoom={zoom}
+            minZoom={minZoom}
+            maxZoom={3}
             aspect={1}
             onCropChange={setCrop}
             onZoomChange={setZoom}
