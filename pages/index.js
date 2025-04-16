@@ -31,7 +31,7 @@ export default function Home() {
         }
 
         setZoom(baseZoom);
-        setMinZoom(baseZoom * 0.8); // permite alejar un poco más
+        setMinZoom(baseZoom * 0.8);
         setImageSrc(reader.result);
       };
       img.src = reader.result;
@@ -43,8 +43,17 @@ export default function Home() {
     const canvasArea = cropAreaRef.current;
     if (!canvasArea) return;
 
-    const canvas = await html2canvas(canvasArea, {
-      backgroundColor: null,
+    const clone = canvasArea.cloneNode(true);
+    const marco = clone.querySelector('img[alt="Marco"]');
+    if (marco) marco.style.display = 'none';
+
+    clone.style.position = 'absolute';
+    clone.style.top = '-10000px';
+    clone.style.background = '#001f4d'; // fondo azul cuadrado
+    document.body.appendChild(clone);
+
+    const canvas = await html2canvas(clone, {
+      backgroundColor: '#001f4d',
       useCORS: true,
       allowTaint: true
     });
@@ -53,6 +62,8 @@ export default function Home() {
     link.download = 'foto_espasa.png';
     link.href = canvas.toDataURL();
     link.click();
+
+    document.body.removeChild(clone);
   };
 
   return (
@@ -70,9 +81,8 @@ export default function Home() {
             height: 300,
             margin: '0 auto',
             backgroundColor: '#001f4d',
-            borderRadius: '50%',
+            borderRadius: 0,
             overflow: 'hidden',
-            touchAction: 'none'
           }}
         >
           <Cropper
@@ -87,10 +97,6 @@ export default function Home() {
             onCropComplete={onCropComplete}
             showGrid={false}
             objectFit="cover"
-            style={{
-              containerStyle: { borderRadius: '50%' },
-              mediaStyle: { borderRadius: '50%' },
-            }}
           />
           <img
             src="/marcos/general.png"
