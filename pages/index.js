@@ -87,6 +87,7 @@ export default function Home() {
             minZoom={minZoom}
             maxZoom={3}
             aspect={1}
+            restrictPosition={false}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
